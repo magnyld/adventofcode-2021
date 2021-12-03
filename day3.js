@@ -44,9 +44,67 @@ function part1() {
 }
 
 
+function returnDataSet (dataSet, position, changeSign) {
+    let count = 0,
+        keep = 0,
+        filteredDataSet = [],
+        moreOnes = false;
+
+    for (var i = 0; i < dataSet.length; i++) {
+        if (dataSet[i] >> position & 0b1) {
+            count++;
+        }
+    }
+
+
+    if (count >= dataSet.length / 2) {
+        moreOnes = true;
+    } else {
+        moreOnes = false;
+    }
+
+    if (changeSign) {
+        moreOnes = !moreOnes;
+    }
+
+    //console.log(moreOnes, count + " of " + dataSet.length);
+
+    for (var i = 0; i < dataSet.length; i++) {
+        let bit = dataSet[i] >> position & 0b1;
+
+        if (bit === 1 && moreOnes) {
+            filteredDataSet.push(dataSet[i]);
+        } 
+        else if (bit === 0 && !moreOnes) {
+            filteredDataSet.push(dataSet[i]);
+        }
+    }
+    
+
+    if (filteredDataSet.length > 1) {
+        filteredDataSet = returnDataSet(filteredDataSet, position-1, changeSign);
+    }
+    
+    //console.log(filteredDataSet[0].toString(2));
+
+    return filteredDataSet;
+}
+
+
 function part2() {
 
+    let oxygen,
+        co2;
+    
+    oxygen = returnDataSet(data, 11, false);
+    
+    console.log(oxygen[0].toString(2) + " (" + oxygen[0] + ")");
 
+    co2 = returnDataSet(data, 11, true);
+
+    console.log(co2[0].toString(2) + " (" + co2[0] + ")");
+
+    return oxygen[0] * co2[0];
 }
 
 
@@ -54,7 +112,7 @@ function getResults() {
 
     var ret = 
         "Part 1: " + part1() +  "<br>" + 
-        //"Part 2: " + part2() "<br>" +
+        "Part 2: " + part2() + "<br>" +
         ""; 
 
     return ret;
