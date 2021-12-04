@@ -1,5 +1,5 @@
 const express = require("express");
-const currentDay = require("./day3");
+const currentDay = require("./day4");
 const app = express();
 const port = 3000;
 
