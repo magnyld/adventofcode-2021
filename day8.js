@@ -306,9 +306,9 @@ function fillMissingNumberWithHint(realNumber, findHint, lengthHint, numberToFin
     
     realNumber.forEach(function (n, index) {
         
-        if (!n.num && n.digit.length === lengthHint) {
+        if (n.num === false && n.digit.length === lengthHint) {
 
-            if(!findHint) {
+            if(findHint === false) {
                 n.num = numberToFind;
             } else if (arrayAllFound(findHint, n.digit)) {
                 n.num = numberToFind;
@@ -364,7 +364,7 @@ function part2(input) {
 
         total += panelNumber;
 
-        //console.log(realNumber, panelNumber)
+        //console.log(">>>", realNumber, panelNumber)
 
     });
 
