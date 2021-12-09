@@ -117,15 +117,6 @@ function parseData(indata) {
     }, []);
 }
 
-
-function arrayAllFound(arr2, arr1) {
-    return arr2.every( n => arr1.includes(n) );
-}
-
-function arrayMinus(arr2, arr1) {
-    return arr2.filter(n => !arr1.includes(n));
-}
-
 function findClosest(data, x, y) {
 
     let ret = {
@@ -225,24 +216,22 @@ function findNextClosest(data, cur, amount, alreadyBeen) {
     let key = cur.current.y + "-" + cur.current.x;
 
     if (alreadyBeen.indexOf(key) !== -1) {
-        //console.log("alreadyBeen", alreadyBeen, key);
         return 0;
     }
 
     alreadyBeen.push(key);
 
-    let findDepth = cur.current.val + 1;
 
-    if (cur.left.val === findDepth && findDepth !== 9) {
+    if (cur.left.val < 9) {
         amount += findNextClosest(data, findClosest(data, cur.left.x, cur.left.y), 1, alreadyBeen);
     }
-    if (cur.right.val === findDepth && findDepth !== 9) {
+    if (cur.right.val < 9) {
         amount += findNextClosest(data, findClosest(data, cur.right.x, cur.right.y), 1, alreadyBeen);
     }
-    if (cur.up.val === findDepth && findDepth !== 9) {
+    if (cur.up.val < 9) {
         amount += findNextClosest(data, findClosest(data, cur.up.x, cur.up.y), 1, alreadyBeen);
     }
-    if (cur.down.val === findDepth && findDepth !== 9) {
+    if (cur.down.val < 9) {
         amount += findNextClosest(data, findClosest(data, cur.down.x, cur.down.y), 1, alreadyBeen);
     }
 
