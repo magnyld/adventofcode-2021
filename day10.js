@@ -124,28 +124,10 @@ const puzzle_data = `
 <[(<{((({<<{{[{}<>]}[[<>{}]({}[])]}{(<{}[]}{<>})<{[]()}[()[]]>}>>}))(<<[<<(<<>{}><<>{}>)<<
 `;
 
-
 function parseData(indata) {
-    return indata.trim().split("\n").reduce((p, v) => {
-        p.push(v.split(""));
-        return p;
-    }, []);
-}
-
-function parseData1(indata) {
     return indata.trim().split("\n");
 }
 
-function arraySort(arr) {
-    arr.sort(function(a, b) {
-        return a - b;
-    });
-
-    return arr;
-}
-
-let open = ['(', '[', '{', '<'];
-let close = [')', ']', '}', '>'];
 
 function getPointsForRow(row) {
 
@@ -176,14 +158,48 @@ function getPointsForRow(row) {
     return point;
 }
 
-function part1(input) {
+function getAutoCompletePoints(row) {
 
-    let data = parseData1(input),
-        totalPoints = 0;
+    let chars = row.split('');
+        points = 0;
+
+    chars.reverse().forEach((char, i) => {
+
+        points = points * 5;
+
+        if(char === '(') {
+            points += 1;
+        } else if(char === '[') {
+            points += 2;
+        } else if(char === '{') {
+            points += 3;
+        } else if(char === '<') {
+            points += 4;
+        }
+
+    });
+
+    return points;
+
+}
+
+function arraySort(arr) {
+    arr.sort(function(a, b) {
+        return a - b;
+    });
+
+    return arr;
+}
+
+function partCalc(input) {
+
+    let data = parseData(input),
+        totalPoints = 0,
+        totalAutoPoints = [];
     
     
     data.forEach((row, ri) => {
-        let orig_row = row;
+
         while (
             row.indexOf('()') !== -1 ||
             row.indexOf('[]') !== -1 ||
@@ -198,46 +214,32 @@ function part1(input) {
 
 
         let points = getPointsForRow(row);
-        totalPoints += points;
-        //console.log(orig_row, row, points);
-    
-    });
 
-    return totalPoints;
-}
-
-function part2(input) {
-
-/*
-
-    let data = parseData(input),
-
-    data.forEach((row, ri) => {
-        if (ri === 0) {
-            console.log(ri, row);
-
-            row.forEach((char, ci) => {
-                if(open.includes(char)) {
-
-                }
-
-            });
-    
-    
-
+        if(points === 0) {
+            totalAutoPoints.push(getAutoCompletePoints(row));
         }
 
-    });
-*/
+        totalPoints += points;
 
-    return 0;
+    });
+    
+    totalAutoPoints = arraySort(totalAutoPoints);
+    console.log(totalAutoPoints);
+    
+    let middleScore = totalAutoPoints[Math.floor(totalAutoPoints.length/2)];
+
+    return {
+        totalPoints: totalPoints,
+        middleScore: middleScore
+    };
+
 }
 
 function getResults() {
 
     var ret = 
-        "Part 1: " + part1(puzzle_data) +  "<br>" + 
-        "Part 2: " + part2(sample_data) + "<br>" +
+        "Part 1: " + partCalc(puzzle_data).totalPoints +  "<br>" + 
+        "Part 2: " + partCalc(puzzle_data).middleScore + "<br>" +
         ""; 
 
     return ret;
