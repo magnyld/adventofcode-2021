@@ -316,6 +316,7 @@ function initBoard(grid) {
                 totalCost: 0,
                 f: cost,
                 parent: null,
+                closed: false,
                 g: 0,
                 h: null,
                 pos: {
@@ -373,46 +374,40 @@ function findNeighbors(grid, node) {
     return ret;
 }
 
+function pathTo(node) {
+  var curr = node;
+  var path = [];
+  while (curr.parent) {
+    path.unshift(curr);
+    curr = curr.parent;
+  }
+  return path;
+}
 
-function aStar(grid, startNode, endNode) {
+function aStar(grid, startNode, endNode, options) {
 
-
-    let openList = [],
-        closedList = [];
-    
 
     var openHeap = getHeap();
 
 
-    openList.push(startNode);
+    openHeap.push(startNode);
 
-    while(openList.length > 0) {
+
+    while(openHeap.size() > 0) {
         var lowInd = 0;
-        for(var i=0; i <openList.length; i++) {
-            if (openList[i].f < openList[lowInd].f) { 
-                lowInd = i; 
-            }
-        }
-
-        var currentNode = openList[lowInd];
+      
+        var currentNode = openHeap.pop();
+        var closest = options.closest || false;
 
         //console.log("currentNode", currentNode);
 
 
-        if(currentNode.pos == endNode.pos) {
-            var curr = currentNode;
-            var ret = [];
-            while(curr.parent) {
-                ret.push(curr);
-                curr = curr.parent;
-            }
-            return ret.reverse();
-
+        if (currentNode === endNode) {
+            return pathTo(currentNode);
         }
 
+        currentNode.closed = true;
 
-        removeNodeFromList(openList, currentNode);
-        closedList.push(currentNode);
 
         var neighbors = findNeighbors(grid, currentNode);
 
@@ -421,44 +416,49 @@ function aStar(grid, startNode, endNode) {
         console.log("open", openList, "closed", closedList);
 
 */
-
-        for(var i=0; i<neighbors.length;i++) {
+        for (var i = 0, il = neighbors.length; i < il; ++i) {
             var neighbor = neighbors[i];
+
             
-            if(findNodeFromList(closedList, neighbor) ) { // || neighbor.isWall()
-                // not a valid node to process, skip to next neighbor
+            if (neighbor.closed) {
+                // Not a valid node to process, skip to next neighbor.
                 continue;
             }
+
     
             // g score is the shortest distance from start to current node, we need to check if
             //   the path we have arrived at this neighbor is the shortest one we have seen yet
             var gScore = currentNode.g + neighbor.cost; // 1 is the distance from a node to it's neighbor
-            var gScoreIsBest = false;
-        
-            if(!findNodeFromList(openList, neighbor)) {
-                // This the the first time we have arrived at this node, it must be the best
-                // Also, we need to take the h (heuristic) score since we haven't done so yet
-        
-                gScoreIsBest = true;
-                neighbor.h = heuristic(neighbor.pos, endNode.pos);
-                openList.push(neighbor);
-            }
-            else if(gScore < neighbor.totalCost) {
-                // We have already seen the node, but last time it had a worse g (distance from start)
-                gScoreIsBest = true;
-            }
-    
-            if(gScoreIsBest) {
-                // Found an optimal (so far) path to this node.   Store info on how we got here and
-                //  just how good it really is...
+            var beenVisited = neighbor.visited;
+
+            if (!beenVisited || gScore < neighbor.g) {
+
+                // Found an optimal (so far) path to this node.  Take score for node to see how good it is.
+                neighbor.visited = true;
                 neighbor.parent = currentNode;
+                neighbor.h = neighbor.h || heuristic(neighbor.pos, endNode.pos);
                 neighbor.g = gScore;
                 neighbor.f = neighbor.g + neighbor.h;
-                neighbor.debug = "F: " + neighbor.f + "<br />G: " + neighbor.g + "<br />H: " + neighbor.h;
+
+                if (closest) {
+                    // If the neighbour is closer than the current closestNode or if it's equally close but has
+                    // a cheaper path than the current closest node then it becomes the closest node
+                    
+                    if (neighbor.h < closestNode.h || (neighbor.h === closestNode.h && neighbor.g < closestNode.g)) {
+                        closestNode = neighbor;
+                    }
+                }
+           
+                if (!beenVisited) {
+                    // Pushing to heap will put it in proper place based on the 'f' value.
+                    openHeap.push(neighbor);
+                } else {
+                    // Already seen the node, but since it has been rescored we need to reorder it in the heap
+                    openHeap.rescoreElement(neighbor);
+                }
             }
         }
         
-
     }
 
     return [];
@@ -483,7 +483,7 @@ function part1(input) {
         endNode = grid[grid.length-1][grid[0].length-1];
        
 
-    let path = aStar(grid, startNode, endNode);
+    let path = aStar(grid, startNode, endNode, {});
     
     //path.unshift(startNode)
 
@@ -568,7 +568,7 @@ function part2(input) {
 
     console.log(grid.length, "x", grid[0].length);
 
-    let path = aStar(grid, startNode, endNode);
+    let path = aStar(grid, startNode, endNode, {});
 
 
     //path.unshift(startNode)
@@ -579,8 +579,8 @@ function part2(input) {
 function getResults() {
 
     var ret = 
-        "Part 1: " + part1(sample_data) +  "<br>" + 
-        //"Part 2: " + part2(puzzle_data) +  "<br>" + 
+        //"Part 1: " + part1(puzzle_data) +  "<br>" + 
+        "Part 2: " + part2(puzzle_data) +  "<br>" + 
         "";
     return ret;
 }
