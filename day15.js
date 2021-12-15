@@ -566,7 +566,7 @@ function part2(input) {
         endNode = grid[grid.length-1][grid[0].length-1];
         
 
-    console.log(grid.length, "x", grid[0].length);
+    //console.log(grid.length, "x", grid[0].length);
 
     let path = aStar(grid, startNode, endNode, {});
 
@@ -579,7 +579,7 @@ function part2(input) {
 function getResults() {
 
     var ret = 
-        //"Part 1: " + part1(puzzle_data) +  "<br>" + 
+        "Part 1: " + part1(puzzle_data) +  "<br>" + 
         "Part 2: " + part2(puzzle_data) +  "<br>" + 
         "";
     return ret;
